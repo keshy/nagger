@@ -18,7 +18,7 @@ def checker(event, context):
     pubsub_message = event.get('data', None)
     msg = pubsub_message if pubsub_message else None
     if msg and type(msg) == str:
-        msg = json.loads(base64.decodestring(msg)).get('data')
+        msg = json.loads(base64.b64decode(msg)).get('data')
     print(msg)
     if msg and msg.get('type'):
         # valid message
