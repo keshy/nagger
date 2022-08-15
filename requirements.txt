@@ -1,3 +1,5 @@
 google-cloud-pubsub
 sendgrid
-jinja2
+streamlit
+pandas
+Pillow
