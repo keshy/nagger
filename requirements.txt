@@ -1,0 +1,5 @@
+google-cloud-pubsub
+sendgrid
+streamlit
+pandas
+Pillow

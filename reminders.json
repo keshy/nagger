@@ -1,0 +1,58 @@
+{
+	"auto_policy": {
+		"due_date": "07/18/2022",
+		"renewal_date": null,
+		"auto_pay": true,
+		"description": "Car policy handled by Geico"
+	}, 
+	"home_insurance_3331_midtown": {
+		"due_date": null,
+		"renewal_date": "08/08/2022",
+		"auto_pay": false,
+		"description": "Condo policy handled by geico"
+	},
+	"home_insurance_9021_devon_crest_elk_grove": {
+		"due_date": null,
+		"renewal_date": "04/13/2023",
+		"auto_pay": false,
+		"description": "Landlord's insurance policy handled by geico"	
+	},
+	"home_warranty_810_schoolhouse_rd": {
+		"due_date": null,
+		"renewal_date": "08/13/2022",
+		"auto_pay": false,
+		"description": "Home warranty for Schoolhouse rd house handled by Fidelity"		
+	}, 
+	"hoa_3331_midtown_place_city_lights": {
+		"due_date": null,
+		"renewal_date": null,
+		"auto_pay": false,
+		"due_cadence": "monthly",
+		"description": "City lights hoa payments. Payments need to be paid manually"		
+	},
+	"9021_devon_crest_way_property_tax_due": {
+		"due_date": "12/10/2022",
+		"renewal_date": null,
+		"auto_pay": false,
+		"description": "Devon crest home property tax payment needs to be made for first installment"			
+	},
+	"3331_midtown_place_property_tax_due": {
+		"due_date": "12/10/2022",
+		"renewal_date": null,
+		"auto_pay": false,
+		"description": "San Jose condo home property tax payment needs to be made for first installment"		
+	},
+	"810_schoolhouse_rd_property_tax_due": {
+		"due_date": "12/10/2022",
+		"renewal_date": null,
+		"auto_pay": false,
+		"description": "San Jose schoolhouse rd home property tax payment needs to be made for first installment"
+	}, 
+	"comcast_quarterly_bill_claim": {
+		"due_date": "12/10/2022",
+		"renewal_date": null,
+		"due_cadence": "quarterly",
+		"auto_pay": false,
+		"description": "Claim internet bill from panw"
+	}
+}
