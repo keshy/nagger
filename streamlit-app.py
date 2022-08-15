@@ -25,6 +25,6 @@ with docs:
     st.markdown("""
         #### Important Documents
         
-        - [Property Management Upkeep](https://docs.google.com/spreadsheets/d/1f-U_s6A6LY_llyKqB7iSC2JGxWFxldoDgr9MBgxUwkc/edit#gid=0)
+   
          
     """)
