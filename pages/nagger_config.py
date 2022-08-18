@@ -87,42 +87,65 @@ st.write(
     " checks. The result of the checks will be sent to the provided email as a notification")
 
 
+def _load_forms_for_user(f_user, code_payload):
+    st.json(code_payload)
+    st.write("Add or update config")
+    nagger_id = st.text_input(key=f_user + '_nagger_id', label="Item Id*")
+    due = st.date_input(key=f_user + '_due', label="Due Date")
+    renewal = st.date_input(key=f_user + '_renewal', label="Renewal Date", value=None)
+    ap = st.checkbox(key=f_user + '_chkbox', label='Auto Pay Enabled?')
+    desc = st.text_input(key=f_user + '_desc', label="Description*")
+    due_cadence = st.multiselect(key=f_user + '_ms', label='cadence',
+                                 options=['Monthly', 'Semi-Yearly', 'Yearly', 'Weekly'])
+    st.button(key=f_user + "_submit_btn", label='Submit', on_click=form_submit_callback,
+              args=(f_user, nagger_id, {
+                  "due": datetime.date.strftime(due, '%m/%d/%Y') if due else None,
+                  "renewal": datetime.date.strftime(renewal, '%m/%d/%Y') if renewal else None,
+                  "ap": ap,
+                  "description": desc,
+                  "cadence": due_cadence
+              }))
+    st.write("Delete Config")
+    keys = CONFIG_CACHE.get(f_user).keys()
+    del_nagger_id = st.multiselect(key=f_user + '_delete_ms', label='Nagger ID*',
+                                   options=keys)
+    del_json = {}
+    for x in del_nagger_id:
+        del_json[x] = CONFIG_CACHE.get(f_user).get(x)
+    st.json(del_json)
+    st.button(key=f_user + "_del_btn", label='Submit', on_click=delete_item, args=(f_user, del_nagger_id))
+
+
+def enable_nagger(f_user, o_user):
+    global storage_client
+    try:
+        if not storage_client:
+            storage_client = storage.Client()
+        bucket = storage_client.bucket('digisafe-nagger')
+        blob = bucket.blob(f_user + '/' + 'nagger_config.json')
+        blob.upload_from_string(json.dumps({}))
+        global CONFIG_CACHE
+        CONFIG_CACHE[f_user] = {}
+        print("Local cache updated for new user " + f_user + " as " + str(CONFIG_CACHE.get(f_user)))
+        return 0, "success"
+    except Exception as e:
+        print(str(e))
+        return 1, "Received exception to find nagger_config " + str(e)
+
+
 def add_configs_for_user(o_user, f_user):
     with st.expander(o_user):
-        st.write("Current Config for " + f_user)
+        global CONFIG_CACHE
         code_payload = CONFIG_CACHE.get(f_user)
         if not CONFIG_CACHE.get(f_user):
             status, msg = get_blob(f_user)
-            code_payload = {} if status != 0 else CONFIG_CACHE.get(f_user)
-        if code_payload:
-            st.json(code_payload)
-            st.write("Add or update config")
-            nagger_id = st.text_input(key=f_user + '_nagger_id', label="Item Id*")
-            due = st.date_input(key=f_user + '_due', label="Due Date")
-            renewal = st.date_input(key=f_user + '_renewal', label="Renewal Date", value=None)
-            ap = st.checkbox(key=f_user + '_chkbox', label='Auto Pay Enabled?')
-            desc = st.text_input(key=f_user + '_desc', label="Description*")
-            due_cadence = st.multiselect(key=f_user + '_ms', label='cadence',
-                                         options=['Monthly', 'Semi-Yearly', 'Yearly', 'Weekly'])
-            st.button(key=f_user + "_submit_btn", label='Submit', on_click=form_submit_callback,
-                      args=(f_user, nagger_id, {
-                          "due": datetime.date.strftime(due, '%m/%d/%Y') if due else None,
-                          "renewal": datetime.date.strftime(renewal, '%m/%d/%Y') if renewal else None,
-                          "ap": ap,
-                          "description": desc,
-                          "cadence": due_cadence
-                      }))
-            st.write("Delete Config")
-            keys = CONFIG_CACHE.get(f_user).keys()
-            del_nagger_id = st.multiselect(key=f_user + '_delete_ms', label='Nagger ID*',
-                                           options=keys)
-            del_json = {}
-            for x in del_nagger_id:
-                del_json[x] = CONFIG_CACHE.get(f_user).get(x)
-            st.json(del_json)
-            st.button(key=f_user + "_del_btn", label='Submit', on_click=delete_item, args=(f_user, del_nagger_id))
+            code_payload = None if status != 0 else CONFIG_CACHE.get(f_user)
+        if code_payload is not None:
+            st.write("Current Config for " + o_user)
+            _load_forms_for_user(f_user, code_payload)
         else:
-            st.error(o_user + " is not registered for Nagger. Contact Keshi8086@gmail.com")
+            st.button(key=f_user + '_nagger_enable', label='Enable Nagger', on_click=enable_nagger,
+                      args=(f_user, o_user))
 
 
 for u in users.USERS:
