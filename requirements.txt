@@ -3,3 +3,5 @@ sendgrid
 streamlit
 pandas
 Pillow
+simple-crypt
+streamlit-tags
