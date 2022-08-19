@@ -4,9 +4,11 @@ import os
 from datetime import datetime
 from sendgrid import SendGridAPIClient, SendGridException
 from sendgrid.helpers.mail import Mail
+from google.cloud import storage
 
 THRESHOLD_NOTIFICATION_DAYS = 30
 reminder_config_dict = {}
+BUCKET = 'digisafe-nagger'
 
 
 def checker(event, context):
@@ -27,10 +29,24 @@ def checker(event, context):
         print("Error message - not doing anything here for: %s" % pubsub_message)
 
 
+def get_config(storage_path=None):
+    if not storage_path:
+        raise Exception("Invalid storage path provided or missing")
+
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(BUCKET)
+        blob = bucket.blob(storage_path)
+        return blob.download_as_string()
+    except Exception as e:
+        print("Could not retrieve nagger config for given path %s due to %s" % (storage_path, e))
+        raise e
+
+
 def process_checks():
-    reminder_config = os.getenv('REMINDER_CONFIG')
+    reminder_config = get_config(os.getenv('REMINDER_CONFIG_PATH'))
     global reminder_config_dict
-    if not reminder_config:
+    if reminder_config is None:
         print("no REMINDER_CONFIG env var is provided")
         exit(1)
     else:
@@ -67,7 +83,9 @@ def process_notification(violations=None):
     if len(violations) == 0:
         html_content = 'No upcoming violations for this week'
     else:
-        content = [reminder_config_dict.get(v) for v in violations]
+        content = {}
+        for v in violations:
+            content[v] = reminder_config_dict.get(v)
         raw_content = "\n \n Please find the list violations below: \n \n"
         html_content = raw_content + json.dumps(content, indent=4, sort_keys=True)
     to_mails = to_mails.split(',')
