@@ -2,7 +2,8 @@ import datetime
 import streamlit as st
 from google.cloud import storage
 import json
-import users
+
+import user_mgmt
 
 CONFIG_CACHE = {}
 storage_client = None
@@ -148,7 +149,11 @@ def add_configs_for_user(o_user, f_user):
                       args=(f_user, o_user))
 
 
-for u in users.USERS:
+us = user_mgmt.get_user_mgr()
+if not us.list():
+    st.error("No users are registered or eligible. Please add users in the Users page to use this feature")
+
+for u in us.list():
     add_configs_for_user(u, u.lower())
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 import streamlit as st
-from pandas import DataFrame
 from PIL import Image
-import users
+import user_mgmt
 
 st.title("Welcome to Schoolhouse Intranet")
 st.write("""
@@ -10,15 +9,19 @@ st.write("""
 """)
 image = Image.open('family.jpg')
 st.image(image, caption='Producers')
-
 u, docs = st.columns(2)
+us = user_mgmt.get_user_mgr()
 
 with u:
     st.markdown("""
         #### Family Members
          
     """)
-    for u in users.USERS:
+
+    if not us.list():
+        st.error("No users are registered or eligible. Please add users in the Users page to use this feature")
+
+    for u in us.list():
         st.markdown("- %s" % u)
 
 with docs:

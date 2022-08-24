@@ -1,9 +1,8 @@
-import datetime
 import streamlit as st
 from google.cloud import storage
 import json
-import users
 from streamlit_tags import st_tags
+import user_mgmt
 
 
 class StorageClient:
@@ -166,8 +165,13 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
 
 
 u_to_mgr_map = {}
-for u in users.USERS:
+us = user_mgmt.get_user_mgr()
+
+if not us.list():
+    st.error("No users are registered or eligible. Please add users in the Users page to use this feature")
+
+for u in us.list():
     u_to_mgr_map[u.lower()] = PwdMgr(u.lower())
 
-for u in users.USERS:
+for u in us.list():
     add_presentation_layer_for_users(u, u.lower(), u_to_mgr_map.get(u.lower()))

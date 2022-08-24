@@ -1,7 +1,2 @@
-google-cloud-pubsub
 sendgrid
-streamlit
-pandas
-Pillow
-simple-crypt
-streamlit-tags
+google-cloud-storage
