@@ -160,8 +160,6 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
                 del_json[x] = u_mgr.list_pwds().get(x)
             st.json(del_json)
             st.button(key=f_user + "_del_btn", label="Delete", on_click=u_mgr.delete, args=(del_items,))
-        else:
-            st.error("Some problem is there " + str(pwd_list))
 
 
 u_to_mgr_map = {}

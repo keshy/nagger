@@ -7,7 +7,7 @@ st.write("""
     This site would be used for locally managing all sensitive data, files, notifications/reminders etc. 
     No more uploading to gmail for everything for just passing files/data around within the house.  
 """)
-image = Image.open('family.jpg')
+image = Image.open('family_office.jpg')
 st.image(image, caption='Producers')
 u, docs = st.columns(2)
 us = user_mgmt.get_user_mgr()
