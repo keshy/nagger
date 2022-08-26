@@ -3,10 +3,10 @@ from google.cloud import storage
 import json
 from streamlit_tags import st_tags
 import user_mgmt
+import config
 
 
 class StorageClient:
-    BUCKET_NAME = "digisafe-nagger"
     PWD_FILE_NAME_FORMAT = "%s/pwd_config.json"
 
     def __init__(self):
@@ -51,7 +51,7 @@ class PwdMgr:
     def _refresh_cache(self):
         # load from source
         try:
-            bucket = self._lazy_init_storage_client().bucket(StorageClient.BUCKET_NAME)
+            bucket = self._lazy_init_storage_client().bucket(cfg_mgr.get_bucket())
             blob = bucket.blob((StorageClient.PWD_FILE_NAME_FORMAT % self.user))
             content = blob.download_as_string()
             self._cache = json.loads(content)
@@ -70,7 +70,7 @@ class PwdMgr:
         cpy = self._cache.copy()
         cpy[pwds.item_id] = pwds.__dict__
         try:
-            bucket = self._lazy_init_storage_client().bucket(StorageClient.BUCKET_NAME)
+            bucket = self._lazy_init_storage_client().bucket(cfg_mgr.get_bucket())
             blob = bucket.blob((StorageClient.PWD_FILE_NAME_FORMAT % self.user))
             blob.upload_from_string(json.dumps(cpy))
         except Exception as e:
@@ -85,7 +85,7 @@ class PwdMgr:
         for item in item_ids:
             cpy.pop(item)
         try:
-            bucket = self._lazy_init_storage_client().bucket(StorageClient.BUCKET_NAME)
+            bucket = self._lazy_init_storage_client().bucket(cfg_mgr.get_bucket())
             blob = bucket.blob((StorageClient.PWD_FILE_NAME_FORMAT % self.user))
             blob.upload_from_string(json.dumps(cpy))
         except Exception as e:
@@ -96,7 +96,7 @@ class PwdMgr:
     def enable_pwd_mgr(self):
         print("Inside enable pwd mgr")
         try:
-            bucket = self._lazy_init_storage_client().bucket(StorageClient.BUCKET_NAME)
+            bucket = self._lazy_init_storage_client().bucket(cfg_mgr.get_bucket())
             blob = bucket.blob((StorageClient.PWD_FILE_NAME_FORMAT % self.user))
             blob.upload_from_string(json.dumps({}))
         except Exception as e:
@@ -129,6 +129,9 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
             for x in selection:
                 res[x] = u_mgr.list_pwds().get(x)
             st.json(res)
+            st.markdown("""
+                ---
+            """)
             st.write("Search passwords by labels")
             lbls = set()
             lbl_to_id_map = {}
@@ -142,7 +145,9 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
             for x in labels:
                 result[lbl_to_id_map[x]] = u_mgr.list_pwds().get(lbl_to_id_map[x])
             st.json(result)
-
+            st.markdown("""
+                ---
+            """)
             st.write("Add/update new password")
             p = Pwd()
             p.item_id = st.text_input(key=f_user + "_item_id", label="Item Id*")
@@ -152,6 +157,9 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
             p.pwd = st.text_input(key=f_user + "_password", label="Password", type="password")
             p.labels = st_tags(key=f_user + "_tags", label="Labels", maxtags=5)
             st.button(key=f_user + "_submit_btn", label="Submit", on_click=u_mgr.add_or_update_pwds, args=(p,))
+            st.markdown("""
+                ---
+            """)
             st.write("Delete Password")
             del_items = st.multiselect(key=f_user + '_del_ms', label="Items to be deleted",
                                        options=u_mgr.list_pwds().keys())
@@ -164,6 +172,7 @@ def add_presentation_layer_for_users(o_user, f_user, u_mgr):
 
 u_to_mgr_map = {}
 us = user_mgmt.get_user_mgr()
+cfg_mgr = config.get_config_mgr()
 
 if not us.list():
     st.error("No users are registered or eligible. Please add users in the Users page to use this feature")

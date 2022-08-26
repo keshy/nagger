@@ -2,7 +2,7 @@ import datetime
 import streamlit as st
 from google.cloud import storage
 import json
-
+import config
 import user_mgmt
 
 CONFIG_CACHE = {}
@@ -24,7 +24,7 @@ def delete_item(user=None, nagger_id=[]):
         global storage_client
         if not storage_client:
             storage_client = storage.Client()
-        bucket = storage_client.bucket('digisafe-nagger')
+        bucket = storage_client.bucket(cfg_mgr.get_bucket())
         blob = bucket.blob(user + '/' + 'nagger_config.json')
         blob.upload_from_string(json.dumps(cpy_on_update))
     except Exception as e:
@@ -52,7 +52,7 @@ def form_submit_callback(user=None, nagger_id=None, data=None):
     cpy_on_update = CONFIG_CACHE.get(user)
     cpy_on_update[nagger_id] = data
     try:
-        bucket = storage_client.bucket('digisafe-nagger')
+        bucket = storage_client.bucket(cfg_mgr.get_bucket())
         blob = bucket.blob(user + '/' + 'nagger_config.json')
         blob.upload_from_string(json.dumps(cpy_on_update))
     except Exception as e:
@@ -71,7 +71,7 @@ def get_blob(user=None):
     try:
         if not storage_client:
             storage_client = storage.Client()
-        bucket = storage_client.bucket('digisafe-nagger')
+        bucket = storage_client.bucket(cfg_mgr.get_bucket())
         blob = bucket.blob(user + '/' + 'nagger_config.json')
         contents = blob.download_as_string()
         global CONFIG_CACHE
@@ -90,6 +90,9 @@ st.write(
 
 def _load_forms_for_user(f_user, code_payload):
     st.json(code_payload)
+    st.markdown("""
+        ---
+    """)
     st.write("Add or update config")
     nagger_id = st.text_input(key=f_user + '_nagger_id', label="Item Id*")
     due = st.date_input(key=f_user + '_due', label="Due Date")
@@ -106,6 +109,9 @@ def _load_forms_for_user(f_user, code_payload):
                   "description": desc,
                   "cadence": due_cadence
               }))
+    st.markdown("""
+        ---
+    """)
     st.write("Delete Config")
     keys = CONFIG_CACHE.get(f_user).keys()
     del_nagger_id = st.multiselect(key=f_user + '_delete_ms', label='Nagger ID*',
@@ -122,7 +128,7 @@ def enable_nagger(f_user, o_user):
     try:
         if not storage_client:
             storage_client = storage.Client()
-        bucket = storage_client.bucket('digisafe-nagger')
+        bucket = storage_client.bucket(cfg_mgr.get_bucket())
         blob = bucket.blob(f_user + '/' + 'nagger_config.json')
         blob.upload_from_string(json.dumps({}))
         global CONFIG_CACHE
@@ -150,6 +156,7 @@ def add_configs_for_user(o_user, f_user):
 
 
 us = user_mgmt.get_user_mgr()
+cfg_mgr = config.get_config_mgr()
 if not us.list():
     st.error("No users are registered or eligible. Please add users in the Users page to use this feature")
 

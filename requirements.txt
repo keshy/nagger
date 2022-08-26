@@ -1,2 +1,2 @@
-sendgrid
+sendgrid~=6.9.7
 google-cloud-storage

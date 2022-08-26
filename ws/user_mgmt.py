@@ -2,21 +2,21 @@ import json
 
 from google.api_core.exceptions import NotFound
 from google.cloud import storage
+import config
 
 USER_MGR = None
 
 
 class Users:
-    BUCKET_NAME = "digisafe-nagger"
-
     def __init__(self):
         self.users = None
         self.client = storage.Client()
+        self.config = config.get_config_mgr()
 
     def _refresh(self):
         content = None
         try:
-            bucket = self.client.bucket(self.BUCKET_NAME)
+            bucket = self.client.bucket(self.config.get_bucket())
             blob = bucket.blob("/user_list.json")
             content = blob.download_as_string()
         except NotFound:
@@ -39,7 +39,7 @@ class Users:
         cpy = self.users.copy()
         cpy.append(username)
         try:
-            bucket = self.client.bucket(self.BUCKET_NAME)
+            bucket = self.client.bucket(self.config.get_bucket())
             blob = bucket.blob("/user_list.json")
             blob.upload_from_string(json.dumps(cpy))
         except Exception as e:
@@ -69,7 +69,7 @@ class Users:
         if idx > -1:
             cpy.pop(idx)
         try:
-            bucket = self.client.bucket(self.BUCKET_NAME)
+            bucket = self.client.bucket(self.config.get_bucket())
             blob = bucket.blob("/user_list.json")
             blob.upload_from_string(json.dumps(cpy))
         except Exception as e:
